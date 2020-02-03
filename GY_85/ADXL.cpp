@@ -2,7 +2,7 @@
 #include "ADXL.h"
 #include <Wire.h>
 
-ADXL::ADXL(TwoWire *tw) // default constructor
+ADXL::ADXL(TwoWire &tw) // default constructor
 {
     i2c_bus = tw;
 }
@@ -24,6 +24,7 @@ void ADXL::writeTo(byte address, byte value)
 
 void ADXL::readData(byte buff[], int *x, int *y, int *z)
 {
+    uint8_t numbToRead = 6;
     readFrom(DATAX0, BYTES_TO_READ,buff);
 
     *x = (((int) buff[1]) << 8) | buff[0];
@@ -51,4 +52,27 @@ void ADXL::readFrom(byte address, size_t size, byte buff[])
 void ADXL::confPrec(byte val)
 {
     writeTo(DATA_FORMAT,val);
+}
+
+int ADXL::getX()
+{
+    return x;
+}
+
+int ADXL::getY()
+{
+    return y;
+}
+
+int ADXL::getZ()
+{
+    return z;
+}
+
+void ADXL::getValues(int *x, int *y, int *z)
+{
+    this->readData(buffer,&x,&y,&z);
+    *x = getX();
+    *y = getY();
+    *z = getZ();
 }

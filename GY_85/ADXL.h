@@ -25,14 +25,22 @@
 
 class ADXL {
     TwoWire *i2c_bus;
+    byte buffer[];
+    int x;
+    int y; 
+    int z;
 
     public:
-    ADXL(TwoWire *tw);
+    ADXL(TwoWire &tw);
     void init();
     void writeTo(byte address, byte value);
     void readData(byte buff[],int *x, int *y, int *z);
     void readFrom(byte address, size_t size, byte buff[]);
     void confPrec(byte val);
+    int getX();
+    int getY();
+    int getZ();
+    void getValues();
 };
 
 #endif
