@@ -80,9 +80,9 @@ Adafruit_SSD1306 display(SCR_WIDTH, SCR_HEIGHT, &scr_bus, OLED_RST);
 
 
 /*accel vars*/
-byte adxl_buffer[ADXL_BYTES_TO_READ]; // byte array to store data from adxl
+//byte adxl_buffer[ADXL_BYTES_TO_READ]; // byte array to store data from adxl
 TwoWire adxl_bus = TwoWire(1); // i2c bus to communicate with adxl
-//ADXL adxl = ADXL(&adxl_bus);
+ADXL adxl = ADXL(adxl_bus);
 
 /*GPS vars*/
 //TinyGPS gps;
@@ -119,9 +119,7 @@ void setup() {
 
   Serial.println("Starting accel");
   /*adxl initialization*/
-  adxl_bus.begin(SDA,SCL,100000);
-  adxlWriteTo(ADXL_DATA_FORMAT,ADXL_PREC4G);
-  adxlWriteTo(ADXL_POWER_CTL,ADXL_REC_MODE);
+  adxl.init();
   Serial.println("Accel init :: [OK]");
   display.print("Accel init :: "); printOK();
   display.display();
@@ -172,8 +170,8 @@ void setup() {
 
 void loop() {
 
-  readGPSData();
-  //adxlReadData();
+  //readGPSData();
+  adxl.getValues(&adxl_x,&adxl_y,&adxl_z);
 
   counter ++;
   testPacket();
