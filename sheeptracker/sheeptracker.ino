@@ -124,13 +124,6 @@ void setup() {
   display.print("Accel init :: "); printOK();
   display.display();
   delay(INTEL_TIME);
-
-//  Serial.println("Starting adxl");
-//  adxl.init();
-//  Serial.println("Adxl init :: ok");
-//  display.println("Adxl init :: [OK]");
-//  display.display();
-//  delay(INTEL_TIME);
   
 
   /* adxl done
@@ -139,8 +132,7 @@ void setup() {
   Serial2.begin(9600,SERIAL_8N1,16,17);
   Serial.println("GPS init :: [OK]");
   display.print("GPS init :: "); printOK();
-  display.display();
-  
+  display.display(); 
   
 
   Serial.println("Starting LoRa configuration");
@@ -268,7 +260,7 @@ void adxlConfigurePrecisionLevel(byte val)
 
 void readGPSData()
 {
-  while(Serial2.available())Serial.print((char)Serial2.read());
+  while(Serial2.available())display.print((char)Serial2.read());
 }
 
 
