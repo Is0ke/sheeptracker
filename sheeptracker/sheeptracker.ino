@@ -85,6 +85,9 @@ TwoWire adxl_bus = TwoWire(1); // i2c bus to communicate with adxl
 /*GPS vars*/
 //TinyGPS gps;
 //SoftwareSerial ss(16,17); // might be deprecated
+String trame = "";
+String latitude;
+String longitude;
 
 
 void setup() {
@@ -275,6 +278,44 @@ void printOK()
   display.display();
 }
 
+void getGPS()
+{
+  //if(Serial2.available()>0)
+  if(Serial.available()>0)
+    {
+      //char recu = Serial2.read();
+      char recu = Serial.read();
+      if(recu == '$')
+      {
+        String msgID = trame.substring(0,6);
+        if(msgID=="$GPGGA")
+        {
+          int count = 0;
+          int i=0;
+          latitude="";
+          longitude="";
+          while(count<5)
+          {
+            if(trame[i]==',')
+              count++;
+            else if(count==2)
+              latitude += trame[i];
+            else if(count==4)
+              longitude += trame[i];
+
+            i++;
+          }
+          Serial.print("Latitude: ");
+          Serial.println(latitude);
+          Serial.print("Longitude: ");
+          Serial.println(longitude);
+        }
+        Serial.println(trame);
+        trame = "";
+      }
+      trame += recu;
+    }
+}
 
 /** FUNCTION PrintFail
  * @brief : display Fail on screen
