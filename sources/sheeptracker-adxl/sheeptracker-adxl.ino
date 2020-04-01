@@ -61,7 +61,7 @@ Adafruit_SSD1306 display(SCR_WIDTH, SCR_HEIGHT, &scr_bus, OLED_RST);
 
 /*accel vars*/
 //byte adxl_buffer[ADXL_BYTES_TO_READ]; // byte array to store data from adxl
-TwoWire adxl_bus = TwoWire(2);
+TwoWire adxl_bus = TwoWire(1);
 ADXL adxl = ADXL(&adxl_bus);
 
 /*GPS vars*/

@@ -68,9 +68,9 @@
 /*GLOBAL VARS*/
 int counter = 0; //count the number of packets => not used anymore TODO : remove
 /*adxl axes data*/
-int adxl_x = 0;
-int adxl_y = 0;
-int adxl_z = 0;
+short int adxl_x = 0;
+short int adxl_y = 0;
+short int adxl_z = 0;
 
 /*display vars*/
 TwoWire scr_bus = TwoWire(0); // i2c bus to communicate with screen
@@ -165,8 +165,9 @@ void setup() {
 
 void loop() {
 
-  readGPSData();
-  //adxlReadData();
+  //readGPSData();
+  adxlReadData();
+  LoRaSend();
 
   //counter ++;
   //testPacket();
@@ -174,22 +175,22 @@ void loop() {
   delay(100);
 }
 
-/**
- * 
- * 
- */
 void testPacket() {
   LoRa.beginPacket();
   LoRa.print("CA PINGUE ?!?!");
   LoRa.endPacket();
 }
 
+void LoRaSend()
+{
+    LoRa.beginPacket();
+    LoRa.print(adxl_x);
+    LoRa.endPacket();
+}
+
 void refreshDisplay() {
   display.clearDisplay();
-  display.setCursor(0, 10);
-  display.println("Nombre de paquets");
-  display.print("envoyes :: ");
-  display.println(counter);
+  display.setCursor(0, 0);
   display.display();
 }
 
