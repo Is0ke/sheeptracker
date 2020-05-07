@@ -1,7 +1,5 @@
 /*LIB INCLSUSION*/
-//lib for gps
-#include <SoftwareSerial.h>
-#include <TinyGPS.h>
+
 //Libs for LoRa
 #include <SPI.h>
 #include <LoRa.h>
@@ -65,6 +63,20 @@
 #define INTEL_TIME 400
 /********************************************************************/
 
+
+struct st_data_t
+{
+    short int x;
+    short int y;
+    short int z;
+
+    String lat;
+    String longt;
+    
+    String state;
+};
+
+
 /*GLOBAL VARS*/
 int counter = 0; //count the number of packets => not used anymore TODO : remove
 /*adxl axes data*/
@@ -72,49 +84,21 @@ short int adxl_x = 0;
 short int adxl_y = 0;
 short int adxl_z = 0;
 
-/*display vars*/
-TwoWire scr_bus = TwoWire(0); // i2c bus to communicate with screen
-Adafruit_SSD1306 display(SCR_WIDTH, SCR_HEIGHT, &scr_bus, OLED_RST);
-
-
 /*accel vars*/
 byte adxl_buffer[ADXL_BYTES_TO_READ]; // byte array to store data from adxl
 TwoWire adxl_bus = TwoWire(1); // i2c bus to communicate with adxl
-//ADXL adxl = ADXL(&adxl_bus);
 
-/*GPS vars*/
-//TinyGPS gps;
-//SoftwareSerial ss(16,17); // might be deprecated
+
 String trame = "";
 String latitude;
 String longitude;
 
+st_data_t toSend;
 
 void setup() {
 
   Serial.begin(9600 );
   /*Screen init*/
-  Serial.println("Resetting SSD1306");
-  pinMode(OLED_RST, OUTPUT);
-  digitalWrite(OLED_RST, LOW);
-  delay(20);
-  digitalWrite(OLED_RST, HIGH);
-  /*communication on i2c bus*/
-  scr_bus.begin(OLED_SDA, OLED_SCL);
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3c, false, false)) {
-    Serial.println(F("SSD1306 alloc failed ..."));
-    while (1);
-  }
-  /*Clear display*/
-  display.clearDisplay();
-  display.setTextColor(WHITE);
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.print("Screen init :: "); printOK();
-  display.display();
-  Serial.println("Screen init :: [OK]");
-  delay(INTEL_TIME);
-
   /* Screen done
      Starting adxl */ 
 
@@ -124,8 +108,6 @@ void setup() {
   adxlWriteTo(ADXL_DATA_FORMAT,ADXL_PREC4G);
   adxlWriteTo(ADXL_POWER_CTL,ADXL_REC_MODE);
   Serial.println("Accel init :: [OK]");
-  display.print("Accel init :: "); printOK();
-  display.display();
   delay(INTEL_TIME);
   
 
@@ -134,9 +116,6 @@ void setup() {
   Serial.println("Starting GPS ...");
   Serial2.begin(9600,SERIAL_8N1,16,17);
   Serial.println("GPS init :: [OK]");
-  display.print("GPS init :: "); printOK();
-  display.display(); 
-  
 
   Serial.println("Starting LoRa configuration");
   SPI.begin(SCK, MISO, MOSI, SS);
@@ -145,10 +124,6 @@ void setup() {
   /*Check if lora init succeed or not*/
   if (!LoRa.begin(BAND)) {
     Serial.println("Starting lora failed ...");
-    display.setCursor(0, 0);
-    display.print("Starting Lora :: "); printFail();
-    display.display();
-
     while (1);
   }
 
@@ -158,20 +133,14 @@ void setup() {
   LoRa.setSyncWord(SYNCWD);
   
   Serial.println("Lora init :: [OK]");
-  display.print("Lora init :: "); printOK();
-  display.display();
   delay(INTEL_TIME);
 }
 
 void loop() {
 
-  //readGPSData();
   adxlReadData();
   LoRaSend();
 
-  //counter ++;
-  //testPacket();
-//  refreshDisplay();
   delay(100);
 }
 
@@ -184,15 +153,33 @@ void testPacket() {
 void LoRaSend()
 {
     LoRa.beginPacket();
-    LoRa.print(adxl_x);
+    if(toSend.x >= 0 ) toSend.state = "EATING";
+    else toSend.state = "NORMAL";
+    LoRa.print("Axe x = ");LoRa.print(toSend.x);LoRa.print("; ");
+    LoRa.print("lat. = ");LoRa.print(toSend.lat); LoRa.print(",");LoRa.print("long. = ");LoRa.print(toSend.longt);LoRa.print(";");
+    LoRa.print("etat = ");LoRa.print(toSend.state);
     LoRa.endPacket();
 }
 
-void refreshDisplay() {
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.display();
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ///// ADXL Function section begins                                        //////
 ///// List of function that allows the ESP32 to communicate with the ADXL //////
@@ -239,16 +226,29 @@ void adxlReadFrom(byte addr, size_t s, byte buff[])
 void adxlReadData()
 {
   uint8_t numbToRead = 6;
+
+  short int prev_x = 0;
+  short int prev_y = 0;
+  short int prev_z = 0;
   
   adxlReadFrom(ADXL_DATAX0, numbToRead, adxl_buffer);
   adxl_x = (((int) adxl_buffer[1]) << 8) | adxl_buffer[0];
   adxl_y = (((int) adxl_buffer[3]) << 8) | adxl_buffer[2];
   adxl_z = (((int) adxl_buffer[5]) << 8) | adxl_buffer[4];
 
-  Serial.println(adxl_x);
-  //Serial.print(", ");
-  //Serial.print(adxl_y);Serial.print(", ");
-  //Serial.println(adxl_z);
+  if (adxl_x != prev_x || adxl_y != prev_y || adxl_z != prev_z)
+  {
+    Serial.print("x = ");Serial.print(adxl_x);Serial.print(", ");
+    Serial.print("y = ");Serial.print(adxl_y);Serial.print(", ");
+    Serial.print("z = ");Serial.println(adxl_z);
+    Serial.flush();
+    prev_x = adxl_x; prev_y = adxl_y; prev_z = adxl_z;
+
+
+    toSend.x = adxl_x;
+    toSend.y = adxl_y;
+    toSend.z= adxl_z;
+  }
 }
 
 /** FUNCTION adxlConfigurePrecisionLevel
@@ -262,23 +262,9 @@ void adxlConfigurePrecisionLevel(byte val)
 
 ///// END OF ADXL functions /////
 
-void readGPSData()
-{
-  while(Serial2.available())display.print((char)Serial2.read());
-}
-
-
-
-
-/** FUNCTION PrintOK
- * @brief : display OK on screen
+/** FUNCTION getGPS
+ * @brief: Get the GPS data
  */
-void printOK()
-{
-  display.println("[OK]");
-  display.display();
-}
-
 void getGPS()
 {
   //if(Serial2.available()>0)
@@ -307,8 +293,10 @@ void getGPS()
             i++;
           }
           Serial.print("Latitude: ");
+          toSend.lat = latitude;
           Serial.println(latitude);
           Serial.print("Longitude: ");
+          toSend.longt = longitude;
           Serial.println(longitude);
         }
         Serial.println(trame);
@@ -316,13 +304,4 @@ void getGPS()
       }
       trame += recu;
     }
-}
-
-/** FUNCTION PrintFail
- * @brief : display Fail on screen
- */
-void printFail()
-{
-  display.println("[FAIL]");
-  display.display();
 }
