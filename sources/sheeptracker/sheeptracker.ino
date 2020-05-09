@@ -74,7 +74,7 @@ String trame = "";
 String latitude;
 String longitude;
 
-st_data_t toSend;
+st_data_t toSend = {0,0,0,};
 
 void setup() {
 
@@ -133,12 +133,13 @@ void testPacket() {
 
 void LoRaSend()
 {
+    //FORMAT DE TRAME => X,Y,Z;lat,long;ETAT
     LoRa.beginPacket();
     if(toSend.x >= 0 ) toSend.state = "EATING";
     else toSend.state = "NORMAL";
-    LoRa.print("Axe x = ");LoRa.print(toSend.x);LoRa.print("; ");
-    LoRa.print("lat. = ");LoRa.print(toSend.lat); LoRa.print(",");LoRa.print("long. = ");LoRa.print(toSend.longt);LoRa.print(";");
-    LoRa.print("etat = ");LoRa.print(toSend.state);
+    LoRa.print(toSend.x);LoRa.print(",");LoRa.print(toSend.y);LoRa.print(",");LoRa.print(toSend.z);LoRa.print(";");
+    LoRa.print(toSend.lat); LoRa.print(",");LoRa.print(toSend.longt);LoRa.print(";");
+    ;LoRa.print(toSend.state);
     LoRa.endPacket();
 }
 

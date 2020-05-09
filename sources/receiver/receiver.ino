@@ -30,8 +30,8 @@ void setup()
   LoRa.setSpreadingFactor(SPREADF);
   LoRa.setSignalBandwidth(SIGNAL_BANDWIDTH);
   LoRa.setSyncWord(SYNC_WORLD);
-
   Serial.println("LoRa Initializing OK!");
+  Serial.println("Les trames recues sont au format x,y,z;lat,long;etat");
 }
 
 void loop()
@@ -51,7 +51,7 @@ void loop()
     }
 
     // print RSSI of packet
-    Serial.print("' with RSSI ");
+    Serial.print(" with RSSI ");
     Serial.println(LoRa.packetRssi());
   }
 }
