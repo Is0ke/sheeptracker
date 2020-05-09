@@ -5,14 +5,14 @@
 
 struct st_data_t
 {
-    inline short int x;
-    inline short int y;
-    inline short int z;
+    short int x;
+    short int y;
+    short int z;
 
     String lat;
     String longt;
     
     String state;
-}
+};
 
 #endif

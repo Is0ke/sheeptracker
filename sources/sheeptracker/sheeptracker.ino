@@ -3,16 +3,10 @@
 //Libs for LoRa
 #include <SPI.h>
 #include <LoRa.h>
-//Libs for OLED display
+
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <splash.h>
 
-//#include <ADXL.h> handmade lib for reading adxl data Work in progress
-/********************************************************/
-//#include <ADXL.h>
-
+#include <sheeptracker_data.h>
 /*CONSTANTS DEFINITION*/
 /*Adxl constants*/
 #define ADXL_ADDRESS 0x53 // address of the ADXL on the GY85 chip
@@ -62,19 +56,6 @@
 
 #define INTEL_TIME 400
 /********************************************************************/
-
-
-struct st_data_t
-{
-    short int x;
-    short int y;
-    short int z;
-
-    String lat;
-    String longt;
-    
-    String state;
-};
 
 
 /*GLOBAL VARS*/
