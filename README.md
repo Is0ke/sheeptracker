@@ -19,4 +19,4 @@ In order to that we need to know:
 * or being social with other sheeps
 
 One driver is hardcoded in the main source code (I know this is bad, but didn't have much time to think about it)
-I would be happy if anyone could help me with how to write proper drivers for I2C devices on arduino
+I would be happy if anyone could help me with **how to write drivers for I2C devices on arduino (the proper/clean way)**
